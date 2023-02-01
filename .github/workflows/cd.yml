@@ -1,0 +1,78 @@
+name: CD
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: Deploying ${{ matrix.build_target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build_target: [macos, linux32, linux64]
+        include:
+          - build_target: macos
+            os: macos-latest
+            artifact_suffix: macos-x86_64
+            target: x86_64-apple-darwin
+            use-cross: false
+          - build_target: linux64
+            os: ubuntu-latest
+            artifact_suffix: linux-x86_64
+            target: x86_64-unknown-linux-musl
+            use-cross: false
+          - build_target: linux32
+            os: ubuntu-latest
+            artifact_suffix: linux-x86_32
+            target: i686-unknown-linux-musl
+            use-cross: true
+    steps:
+      - name: Set up Linux deps
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install pkg-config musl musl-dev musl-tools
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          target: ${{ matrix.target }}
+          profile: minimal
+      - name: Set up access
+        uses: actions/checkout@v2
+      - name: Set up cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: ${{ matrix.use-cross }}
+          command: build
+          args: --release --target ${{ matrix.target }} ${{ matrix.features }}
+      - name: Pack
+        shell: bash
+        run: |
+          cd target/
+          ls -la
+          cd ${{ matrix.target }}/
+          ls -la
+          cd release
+          ls -la
+          tar czvf tickrs-${{ matrix.target }}.tar.gz tickrs
+          shasum -a 256 tickrs-${{ matrix.target }}.tar.gz > tickrs-${{ matrix.target }}.sha256
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/${{ matrix.target }}/release/tickrs-*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -65,7 +65,8 @@ impl StatefulWidget for AddStockWidget {
                     &state.search_string,
                     style()
                         .add_modifier(Modifier::BOLD)
-                        .fg(THEME.text_secondary()),
+                        // color updated from secondary to normal
+                        .fg(THEME.text_normal()),
                 ),
             ])
         };

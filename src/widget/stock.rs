@@ -478,7 +478,8 @@ impl StockState {
 
             let label = Span::styled(
                 self.time_frame.format_time(*timestamp),
-                style().fg(THEME.text_normal()),
+                // color updated from normal to gray
+                style().fg(THEME.gray()),
             );
 
             labels.push(label);
@@ -496,15 +497,18 @@ impl StockState {
             vec![
                 Span::styled(
                     format!("{:>8}", format_decimals(min)),
-                    style().fg(THEME.text_normal()),
+                    // color updated from normal to gray
+                    style().fg(THEME.gray()),
                 ),
                 Span::styled(
                     format!("{:>8}", format_decimals((min + max) / 2.0)),
-                    style().fg(THEME.text_normal()),
+                    // color updated from normal to gray
+                    style().fg(THEME.gray()),
                 ),
                 Span::styled(
                     format!("{:>8}", format_decimals(max)),
-                    style().fg(THEME.text_normal()),
+                    // color updated from normal to gray
+                    style().fg(THEME.gray()),
                 ),
             ]
         } else {
@@ -608,34 +612,35 @@ impl CachableWidget<StockState> for StockWidget {
 
         let loaded = state.loaded();
 
-        let (company_name, currency) = match state.profile.as_ref() {
-            Some(profile) => (
-                profile.price.short_name.as_str(),
-                profile.price.currency.as_deref().unwrap_or("USD"),
-            ),
-            None => ("", ""),
-        };
-
-        let loading_indicator = ".".repeat(state.loading_tick);
-
-        // Draw widget block
-        {
-            block::new(&format!(
-                " {}{:<4} ",
-                state.symbol,
-                if loaded {
-                    format!(" - {}", company_name)
-                } else if state.profile.is_some() {
-                    format!(" - {}{:<4}", company_name, loading_indicator)
-                } else {
-                    loading_indicator
-                }
-            ))
-            .render(area, buf);
-            area = add_padding(area, 1, PaddingDirection::All);
-            area = add_padding(area, 1, PaddingDirection::Left);
-            area = add_padding(area, 1, PaddingDirection::Right);
-        }
+//  company_info widget disabled (part 1, disabling the widget)
+//         let (company_name, currency) = match state.profile.as_ref() {
+//             Some(profile) => (
+//                 profile.price.short_name.as_str(),
+//                 profile.price.currency.as_deref().unwrap_or("USD"),
+//             ),
+//             None => ("", ""),
+//         };
+// 
+//         let loading_indicator = ".".repeat(state.loading_tick);
+// 
+//         // Draw widget block
+//         {
+//             block::new(&format!(
+//                 " {}{:<4} ",
+//                 state.symbol,
+//                 if loaded {
+//                     format!(" - {}", company_name)
+//                 } else if state.profile.is_some() {
+//                     format!(" - {}{:<4}", company_name, loading_indicator)
+//                 } else {
+//                     loading_indicator
+//                 }
+//             ))
+//             .render(area, buf);
+//             area = add_padding(area, 1, PaddingDirection::All);
+//             area = add_padding(area, 1, PaddingDirection::Left);
+//             area = add_padding(area, 1, PaddingDirection::Right);
+//         }
 
         // chunks[0] - Company Info
         // chunks[1] - Graph - fill remaining space
@@ -643,7 +648,8 @@ impl CachableWidget<StockState> for StockWidget {
         let mut chunks = Layout::default()
             .constraints(
                 [
-                    Constraint::Length(6),
+                    // company_info widget disabled, thus Length from 5 changed to 0
+                    Constraint::Length(0),
                     Constraint::Min(0),
                     Constraint::Length(2),
                 ]
@@ -651,177 +657,180 @@ impl CachableWidget<StockState> for StockWidget {
             )
             .split(area);
 
-        // Draw company info
-        {
-            // info_chunks[0] - Prices / volumes
-            // info_chunks[1] - Toggle block
-            let mut info_chunks = Layout::default()
-                .direction(Direction::Horizontal)
-                .constraints([Constraint::Min(23), Constraint::Length(29)].as_ref())
-                .split(chunks[0]);
-            info_chunks[0] = add_padding(info_chunks[0], 1, PaddingDirection::Top);
-
-            let (high, low) = state.high_low(&data);
+//  company_info widget disabled (part 2, disabling the info, keeping the current price)
+//         // Draw company info
+//         {
+//             // info_chunks[0] - Prices / volumes
+//             // info_chunks[1] - Toggle block
+//             let mut info_chunks = Layout::default()
+//                 .direction(Direction::Horizontal)
+//                 .constraints([Constraint::Min(23), Constraint::Length(29)].as_ref())
+//                 .split(chunks[0]);
+//             info_chunks[0] = add_padding(info_chunks[0], 1, PaddingDirection::Top);
+// 
+//             let (high, low) = state.high_low(&data);
             let current_fmt = format_decimals(state.current_price());
-            let high_fmt = format_decimals(high);
-            let low_fmt = format_decimals(low);
+//             let high_fmt = format_decimals(high);
+//             let low_fmt = format_decimals(low);
+// 
+//             let vol = state.reg_mkt_volume.clone().unwrap_or_default();
+// 
+//             let company_info = vec![
+//                 Spans::from(vec![
+//                     Span::styled("C: ", style()),
+//                     Span::styled(
+//                         if loaded {
+//                             format!("{} {}", current_fmt, currency)
+//                         } else {
+//                             "".to_string()
+//                         },
+//                         style()
+//                             .add_modifier(Modifier::BOLD)
+//                             .fg(THEME.text_primary()),
+//                     ),
+//                     Span::styled(
+//                         if loaded {
+//                             format!("  {:.2}%", pct_change * 100.0)
+//                         } else {
+//                             "".to_string()
+//                         },
+//                         style()
+//                             .add_modifier(Modifier::BOLD)
+//                             .fg(if pct_change >= 0.0 {
+//                                 THEME.profit()
+//                             } else {
+//                                 THEME.loss()
+//                             }),
+//                     ),
+//                 ]),
+//                 Spans::from(vec![
+//                     Span::styled("H: ", style()),
+//                     Span::styled(
+//                         if loaded { high_fmt } else { "".to_string() },
+//                         style().fg(THEME.text_secondary()),
+//                     ),
+//                 ]),
+//                 Spans::from(vec![
+//                     Span::styled("L: ", style()),
+//                     Span::styled(
+//                         if loaded { low_fmt } else { "".to_string() },
+//                         style().fg(THEME.text_secondary()),
+//                     ),
+//                 ]),
+//                 Spans::default(),
+//                 Spans::from(vec![
+//                     Span::styled("Volume: ", style()),
+//                     Span::styled(
+//                         if loaded { vol } else { "".to_string() },
+//                         style().fg(THEME.text_secondary()),
+//                     ),
+//                 ]),
+//             ];
+// 
+//             Paragraph::new(company_info)
+//                 .style(style().fg(THEME.text_normal()))
+//                 .alignment(Alignment::Left)
+//                 .wrap(Wrap { trim: true })
+//                 .render(info_chunks[0], buf);
+// 
 
-            let vol = state.reg_mkt_volume.clone().unwrap_or_default();
-
-            let company_info = vec![
-                Spans::from(vec![
-                    Span::styled("C: ", style()),
-                    Span::styled(
-                        if loaded {
-                            format!("{} {}", current_fmt, currency)
-                        } else {
-                            "".to_string()
-                        },
-                        style()
-                            .add_modifier(Modifier::BOLD)
-                            .fg(THEME.text_primary()),
-                    ),
-                    Span::styled(
-                        if loaded {
-                            format!("  {:.2}%", pct_change * 100.0)
-                        } else {
-                            "".to_string()
-                        },
-                        style()
-                            .add_modifier(Modifier::BOLD)
-                            .fg(if pct_change >= 0.0 {
-                                THEME.profit()
-                            } else {
-                                THEME.loss()
-                            }),
-                    ),
-                ]),
-                Spans::from(vec![
-                    Span::styled("H: ", style()),
-                    Span::styled(
-                        if loaded { high_fmt } else { "".to_string() },
-                        style().fg(THEME.text_secondary()),
-                    ),
-                ]),
-                Spans::from(vec![
-                    Span::styled("L: ", style()),
-                    Span::styled(
-                        if loaded { low_fmt } else { "".to_string() },
-                        style().fg(THEME.text_secondary()),
-                    ),
-                ]),
-                Spans::default(),
-                Spans::from(vec![
-                    Span::styled("Volume: ", style()),
-                    Span::styled(
-                        if loaded { vol } else { "".to_string() },
-                        style().fg(THEME.text_secondary()),
-                    ),
-                ]),
-            ];
-
-            Paragraph::new(company_info)
-                .style(style().fg(THEME.text_normal()))
-                .alignment(Alignment::Left)
-                .wrap(Wrap { trim: true })
-                .render(info_chunks[0], buf);
-
-            if !*HIDE_TOGGLE {
-                let toggle_block = block::new(" Toggle ");
-                toggle_block.render(info_chunks[1], buf);
-
-                info_chunks[1] = add_padding(info_chunks[1], 1, PaddingDirection::All);
-                info_chunks[1] = add_padding(info_chunks[1], 1, PaddingDirection::Left);
-
-                let toggle_chunks = Layout::default()
-                    .direction(Direction::Horizontal)
-                    .constraints([
-                        Constraint::Length(12),
-                        Constraint::Length(2),
-                        Constraint::Length(12),
-                    ])
-                    .split(info_chunks[1]);
-
-                let mut left_info = vec![Spans::from(Span::styled("Summary  's'", style()))];
-                let mut right_info = vec![];
-
-                if loaded {
-                    left_info.push(Spans::from(Span::styled(
-                        format!("{: <8} 'c'", chart_type.as_str()),
-                        style(),
-                    )));
-
-                    left_info.push(Spans::from(Span::styled(
-                        "Volumes  'v'",
-                        style()
-                            .bg(if show_volumes {
-                                THEME.highlight_unfocused()
-                            } else {
-                                THEME.background()
-                            })
-                            .fg(if chart_type == ChartType::Kagi {
-                                THEME.gray()
-                            } else {
-                                THEME.text_normal()
-                            }),
-                    )));
-
-                    left_info.push(Spans::from(Span::styled(
-                        "X Labels 'x'",
-                        style().bg(if show_x_labels {
-                            THEME.highlight_unfocused()
-                        } else {
-                            THEME.background()
-                        }),
-                    )));
-
-                    right_info.push(Spans::from(Span::styled(
-                        "Pre Post 'p'",
-                        style().bg(if enable_pre_post {
-                            THEME.highlight_unfocused()
-                        } else {
-                            THEME.background()
-                        }),
-                    )));
-
-                    right_info.push(Spans::from(Span::styled(
-                        "Edit     'e'",
-                        style()
-                            .bg(if state.show_configure {
-                                THEME.highlight_unfocused()
-                            } else {
-                                THEME.background()
-                            })
-                            .fg(if state.configure_enabled() {
-                                THEME.text_normal()
-                            } else {
-                                THEME.gray()
-                            }),
-                    )));
-                }
-
-                if state.options_enabled() && loaded {
-                    right_info.push(Spans::from(Span::styled(
-                        "Options  'o'",
-                        style().bg(if state.show_options {
-                            THEME.highlight_unfocused()
-                        } else {
-                            THEME.background()
-                        }),
-                    )));
-                }
-
-                Paragraph::new(left_info)
-                    .style(style().fg(THEME.text_normal()))
-                    .alignment(Alignment::Left)
-                    .render(toggle_chunks[0], buf);
-
-                Paragraph::new(right_info)
-                    .style(style().fg(THEME.text_normal()))
-                    .alignment(Alignment::Left)
-                    .render(toggle_chunks[2], buf);
-            }
-        }
+// help widget disabled
+//             if !*HIDE_TOGGLE {
+//                 let toggle_block = block::new(" Toggle ");
+//                 toggle_block.render(info_chunks[1], buf);
+// 
+//                 info_chunks[1] = add_padding(info_chunks[1], 1, PaddingDirection::All);
+//                 info_chunks[1] = add_padding(info_chunks[1], 1, PaddingDirection::Left);
+// 
+//                 let toggle_chunks = Layout::default()
+//                     .direction(Direction::Horizontal)
+//                     .constraints([
+//                         Constraint::Length(12),
+//                         Constraint::Length(2),
+//                         Constraint::Length(12),
+//                     ])
+//                     .split(info_chunks[1]);
+// 
+//                 let mut left_info = vec![Spans::from(Span::styled("Summary  's'", style()))];
+//                 let mut right_info = vec![];
+// 
+//                 if loaded {
+//                     left_info.push(Spans::from(Span::styled(
+//                         format!("{: <8} 'c'", chart_type.as_str()),
+//                         style(),
+//                     )));
+// 
+//                     left_info.push(Spans::from(Span::styled(
+//                         "Volumes  'v'",
+//                         style()
+//                             .bg(if show_volumes {
+//                                 THEME.highlight_unfocused()
+//                             } else {
+//                                 THEME.background()
+//                             })
+//                             .fg(if chart_type == ChartType::Kagi {
+//                                 THEME.gray()
+//                             } else {
+//                                 THEME.text_normal()
+//                             }),
+//                     )));
+// 
+//                     left_info.push(Spans::from(Span::styled(
+//                         "X Labels 'x'",
+//                         style().bg(if show_x_labels {
+//                             THEME.highlight_unfocused()
+//                         } else {
+//                             THEME.background()
+//                         }),
+//                     )));
+// 
+//                     right_info.push(Spans::from(Span::styled(
+//                         "Pre Post 'p'",
+//                         style().bg(if enable_pre_post {
+//                             THEME.highlight_unfocused()
+//                         } else {
+//                             THEME.background()
+//                         }),
+//                     )));
+// 
+//                     right_info.push(Spans::from(Span::styled(
+//                         "Edit     'e'",
+//                         style()
+//                             .bg(if state.show_configure {
+//                                 THEME.highlight_unfocused()
+//                             } else {
+//                                 THEME.background()
+//                             })
+//                             .fg(if state.configure_enabled() {
+//                                 THEME.text_normal()
+//                             } else {
+//                                 THEME.gray()
+//                             }),
+//                     )));
+//                 }
+// 
+//                 if state.options_enabled() && loaded {
+//                     right_info.push(Spans::from(Span::styled(
+//                         "Options  'o'",
+//                         style().bg(if state.show_options {
+//                             THEME.highlight_unfocused()
+//                         } else {
+//                             THEME.background()
+//                         }),
+//                     )));
+//                 }
+// 
+//                 Paragraph::new(left_info)
+//                     .style(style().fg(THEME.text_normal()))
+//                     .alignment(Alignment::Left)
+//                     .render(toggle_chunks[0], buf);
+// 
+//                 Paragraph::new(right_info)
+//                     .style(style().fg(THEME.text_normal()))
+//                     .alignment(Alignment::Left)
+//                     .render(toggle_chunks[2], buf);
+//             }
+//         }
 
         // graph_chunks[0] = prices
         // graph_chunks[1] = volume
@@ -905,8 +914,45 @@ impl CachableWidget<StockState> for StockWidget {
 
             Tabs::new(tab_names)
                 .select(state.time_frame.idx())
-                .style(style().fg(THEME.text_secondary()))
-                .highlight_style(style().fg(THEME.text_primary()))
+                // color updated from secondary to gray
+                .style(style().fg(THEME.gray()))
+                // color updated from primary to normal
+                .highlight_style(style().fg(THEME.text_normal()))
+                .render(layout[0], buf);
+
+            // gains_info widget introduced (gets the current price from the company_info widget)
+            let gains_info = vec![
+                Spans::from(vec![
+                    Span::styled(
+                        if loaded {
+                            format!("{}", current_fmt)
+                        } else {
+                            "".to_string()
+                        },
+                        style()
+                            .add_modifier(Modifier::BOLD)
+                            .fg(THEME.text_normal()),
+                    ),
+                    Span::styled(
+                        if loaded {
+                            format!(" ({:.2}%)", pct_change * 100.0)
+                        } else {
+                            "".to_string()
+                        },
+                        style()
+                            .add_modifier(Modifier::BOLD)
+                            .fg(if pct_change >= 0.0 {
+                                THEME.profit()
+                            } else {
+                                THEME.loss()
+                            }),
+                    ),
+                ]),
+            ];
+
+            Paragraph::new(gains_info)
+                .alignment(Alignment::Right)
+                .wrap(Wrap { trim: true })
                 .render(layout[0], buf);
 
             if let Some(chart_state) = state.chart_state.as_ref() {
@@ -917,15 +963,17 @@ impl CachableWidget<StockState> for StockWidget {
                 let left_arrow = Span::styled(
                     "ᐸ",
                     style().fg(if more_left {
-                        THEME.text_normal()
+                        // color updated from normal to gray
+                        THEME.gray()
                     } else {
+                        // color updated from normal to gray
                         THEME.gray()
                     }),
                 );
                 let right_arrow = Span::styled(
                     "ᐳ",
                     style().fg(if more_right {
-                        THEME.text_normal()
+                        THEME.gray()
                     } else {
                         THEME.gray()
                     }),

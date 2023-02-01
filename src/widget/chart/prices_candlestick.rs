@@ -37,7 +37,8 @@ impl<'a> StatefulWidget for PricesCandlestickChart<'a> {
         if !self.is_summary {
             Block::default()
                 .borders(Borders::TOP)
-                .border_style(style().fg(THEME.border_secondary()))
+                // border color updated from secondary to gray
+                .border_style(style().fg(THEME.gray()))
                 .render(area, buf);
             area = add_padding(area, 1, PaddingDirection::Top);
         }
@@ -181,7 +182,8 @@ impl<'a> StatefulWidget for PricesCandlestickChart<'a> {
                         } else {
                             Borders::LEFT
                         })
-                        .border_style(style().fg(THEME.border_axis())),
+                        // border color updated from axis to gray
+                        .border_style(style().fg(THEME.gray())),
                 )
                 .x_bounds([0.0, num_candles as f64 * 4.0])
                 .y_bounds(state.y_bounds(min, max))
@@ -245,7 +247,8 @@ impl<'a> StatefulWidget for PricesCandlestickChart<'a> {
                 } else {
                     Borders::LEFT
                 })
-                .border_style(style().fg(THEME.border_axis()))
+                // border color updated from axis to gray
+                .border_style(style().fg(THEME.gray()))
                 .render(layout[1], buf);
         }
     }

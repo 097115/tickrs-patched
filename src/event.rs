@@ -54,7 +54,7 @@ fn handle_keys_display_stock(keycode: KeyCode, modifiers: KeyModifiers, app: &mu
             app.stocks.swap(app.current_tab, new_idx);
             app.current_tab = new_idx;
         }
-        (KeyCode::BackTab, KeyModifiers::SHIFT) => {
+        (KeyCode::BackTab, KeyModifiers::SHIFT) | (KeyCode::F(1), KeyModifiers::NONE) | (KeyCode::Char('j'), KeyModifiers::NONE) => {
             if app.current_tab == 0 {
                 app.current_tab = app.stocks.len() - 1;
             } else {
@@ -67,11 +67,11 @@ fn handle_keys_display_stock(keycode: KeyCode, modifiers: KeyModifiers, app: &mu
         (KeyCode::Right, KeyModifiers::NONE) => {
             app.stocks[app.current_tab].time_frame_up();
         }
-        (KeyCode::Char('/'), KeyModifiers::NONE) => {
+        (KeyCode::Char('/'), KeyModifiers::NONE) | (KeyCode::Char('\\'), KeyModifiers::NONE) | (KeyCode::Char('a'), KeyModifiers::NONE) | (KeyCode::Char('+'), KeyModifiers::SHIFT) => {
             app.previous_mode = app.mode;
             app.mode = app::Mode::AddStock;
         }
-        (KeyCode::Char('k'), KeyModifiers::NONE) => {
+        (KeyCode::Delete, KeyModifiers::NONE) | (KeyCode::Char('d'), KeyModifiers::NONE) => {
             app.stocks.remove(app.current_tab);
 
             if app.current_tab != 0 {
@@ -102,7 +102,7 @@ fn handle_keys_display_stock(keycode: KeyCode, modifiers: KeyModifiers, app: &mu
                 app.mode = app::Mode::ConfigureChart;
             }
         }
-        (KeyCode::Tab, KeyModifiers::NONE) => {
+        (KeyCode::Tab, KeyModifiers::NONE) | (KeyCode::F(2), KeyModifiers::NONE) | (KeyCode::Char('k'), KeyModifiers::NONE)=> {
             if app.current_tab == app.stocks.len() - 1 {
                 app.current_tab = 0;
             } else {
@@ -138,7 +138,7 @@ fn handle_keys_display_summary(keycode: KeyCode, app: &mut app::App) {
         KeyCode::Char('s') => {
             app.mode = app::Mode::DisplayStock;
         }
-        KeyCode::Char('/') => {
+        KeyCode::Char('/') | KeyCode::Char('\\') | KeyCode::Char('a') | KeyCode::Char('+') => {
             app.previous_mode = app.mode;
             app.mode = app::Mode::AddStock;
         }

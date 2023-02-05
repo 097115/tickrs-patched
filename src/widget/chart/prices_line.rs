@@ -197,7 +197,8 @@ impl<'a> StatefulWidget for PricesLineChart<'a> {
                 let axis = Axis::default().bounds(state.x_bounds(start, end, self.data));
 
                 if self.show_x_labels && self.loaded && !self.is_summary {
-                    axis.labels(x_labels).style(style().fg(THEME.border_axis()))
+                    // border color updated from axis to gray
+                    axis.labels(x_labels).style(style().fg(THEME.gray()))
                 } else {
                     axis
                 }
@@ -206,17 +207,19 @@ impl<'a> StatefulWidget for PricesLineChart<'a> {
                 Axis::default()
                     .bounds(state.y_bounds(min, max))
                     .labels(state.y_labels(min, max))
-                    .style(style().fg(THEME.border_axis())),
+                    // border color updated from axis to gray
+                    .style(style().fg(THEME.gray())),
             );
 
-        if !self.is_summary {
-            chart = chart.block(
-                Block::default()
-                    .style(style().fg(THEME.border_secondary()))
-                    .borders(Borders::TOP)
-                    .border_style(style()),
-            );
-        }
+//         if !self.is_summary {
+//             chart = chart.block(
+//                 Block::default()
+//                     // border color updated from secondary to gray
+//                     .style(style().fg(THEME.gray()))
+//                     .borders(Borders::TOP)
+//                     .border_style(style()),
+//             );
+//         }
 
         chart.render(area, buf);
     }

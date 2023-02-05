@@ -101,12 +101,14 @@ fn draw_main<B: Backend>(frame: &mut Frame<B>, app: &mut App, area: Rect) {
     // layout[0] - Header
     // layout[1] - Main widget
     let mut layout = Layout::default()
-        .constraints([Constraint::Length(3), Constraint::Min(0)].as_ref())
+        // changed from 3 to 1 not to waste space
+        .constraints([Constraint::Length(0), Constraint::Min(0)].as_ref())
         .split(area);
 
     if !app.stocks.is_empty() {
-        frame.render_widget(crate::widget::block::new(" Tabs "), layout[0]);
-        layout[0] = add_padding(layout[0], 1, PaddingDirection::All);
+        // drawing the block disabled, a separating line is more than enough
+        // frame.render_widget(crate::widget::block::new(""), layout[0]);
+        // layout[0] = add_padding(layout[0], 1, PaddingDirection::All);
 
         // header[0] - Stock symbol tabs
         // header[1] - (Optional) help icon
@@ -126,8 +128,9 @@ fn draw_main<B: Backend>(frame: &mut Frame<B>, app: &mut App, area: Rect) {
             frame.render_widget(
                 Tabs::new(tabs)
                     .select(app.current_tab)
-                    .style(style().fg(THEME.text_secondary()))
-                    .highlight_style(style().fg(THEME.text_primary())),
+                    .style(style().fg(THEME.gray()))
+                    // color updated from primary to normal
+                    .highlight_style(style().fg(THEME.text_normal())),
                 header[0],
             );
         }
@@ -135,9 +138,11 @@ fn draw_main<B: Backend>(frame: &mut Frame<B>, app: &mut App, area: Rect) {
         // Draw help icon
         if !app.hide_help {
             frame.render_widget(
-                Paragraph::new(Text::styled("Help '?'", style()))
-                    .style(style().fg(THEME.text_normal()))
-                    .alignment(Alignment::Center),
+                Paragraph::new(Text::styled("?", style()))
+                    // color updated from normal to gray
+                    .style(style().fg(THEME.gray()))
+                    // alignment updated from center to right
+                    .alignment(Alignment::Right),
                 header[1],
             );
         }

@@ -56,7 +56,8 @@ impl<'a> StatefulWidget for VolumeBarChart<'a> {
 
             Block::default()
                 .borders(Borders::LEFT)
-                .border_style(style().fg(THEME.border_axis()))
+                // border color updated from axis to gray
+                .border_style(style().fg(THEME.gray()))
                 .render(volume_chunks, buf);
 
             volume_chunks.x += 1;

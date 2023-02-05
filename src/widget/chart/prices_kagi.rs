@@ -332,13 +332,14 @@ impl<'a> StatefulWidget for PricesKagiChart<'a> {
 
         let kagi_trends = calculate_trends(self.data, reversal_option, price_option);
 
-        if !self.is_summary {
-            Block::default()
-                .borders(Borders::TOP)
-                .border_style(style().fg(THEME.border_secondary()))
-                .render(area, buf);
-            area = add_padding(area, 1, PaddingDirection::Top);
-        }
+//         if !self.is_summary {
+//             Block::default()
+//                 // border color updated from secondary to gray
+//                 .borders(Borders::TOP)
+//                 .border_style(style().fg(THEME.gray()))
+//                 .render(area, buf);
+//             area = add_padding(area, 1, PaddingDirection::Top);
+//         }
 
         // x_layout[0] - chart + y labels
         // x_layout[1] - (x labels)
@@ -464,7 +465,8 @@ impl<'a> StatefulWidget for PricesKagiChart<'a> {
                         } else {
                             Borders::LEFT
                         })
-                        .border_style(style().fg(THEME.border_axis())),
+                        // border color updated from axis to gray
+                        .border_style(style().fg(THEME.gray())),
                 )
                 .x_bounds([0.0, chart_width])
                 .y_bounds(state.y_bounds(min, max))
@@ -582,7 +584,8 @@ impl<'a> StatefulWidget for PricesKagiChart<'a> {
                 } else {
                     Borders::LEFT
                 })
-                .border_style(style().fg(THEME.border_axis()))
+                // border color updated from axis to gray
+                .border_style(style().fg(THEME.gray()))
                 .render(layout[1], buf);
         }
     }

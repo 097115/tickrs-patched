@@ -1,3 +1,8 @@
+use std::env;
+use std::fs::File;
+use std::io::{prelude::*, BufReader};
+use std::path::Path;
+use std::path::PathBuf;
 use std::collections::HashMap;
 
 use anyhow::{bail, Context, Result};
@@ -191,33 +196,23 @@ impl Client {
     }
 
     pub async fn get_crumb(&self) -> Result<CrumbData> {
-        let res = self
-            .client
-            .get_async("https://fc.yahoo.com")
-            .await
-            .context("Failed to get request")?;
+        let exe = env::current_exe()?;
+        let cfg: PathBuf = (exe.to_string_lossy().to_string() + ".conf").into();
 
-        let Some(cookie) = res
-            .headers()
-            .get(header::SET_COOKIE)
-            .and_then(|header| header.to_str().ok())
-            .and_then(|s| s.split_once(';').map(|(value, _)| value))
-        else {
-            bail!("Couldn't fetch cookie");
-        };
+        fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
+            let file = File::open(filename).expect("Failed to read the file");
+            let buf = BufReader::new(file);
+            buf.lines()
+                .map(|l| l.expect("Failed to parse the line"))
+                .collect()
+        }
 
-        let request = Request::builder()
-            .uri(self.get_url(Version::V1, "test/getcrumb", None)?)
-            .header(header::USER_AGENT, "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
-            .header(header::COOKIE, cookie)
-            .method(http::Method::GET)
-            .body(())?;
-        let mut res = self.client.send_async(request).await?;
-
-        let crumb = res.text().await?;
+        let cred = lines_from_file(cfg);
+        let cookie = cred[0].to_string();
+        let crumb = cred[1].to_string();
 
         Ok(CrumbData {
-            cookie: cookie.to_string(),
+            cookie,
             crumb,
         })
     }
